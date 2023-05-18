@@ -62,21 +62,23 @@ if (isModEnabled("expedition")) {
 	$langs->loadLangs(array('sendings'));
 }
 
+// Get Parameters
 $socid = GETPOST('socid', 'int');
 
-$action = GETPOST('action', 'aZ09');
+$action 	= GETPOST('action', 'aZ09');
 $massaction = GETPOST('massaction', 'alpha');
 $show_files = GETPOST('show_files', 'int');
-$confirm = GETPOST('confirm', 'alpha');
-$toselect = GETPOST('toselect', 'array');
+$confirm 	= GETPOST('confirm', 'alpha');
+$cancel     = GETPOST('cancel', 'alpha');
+$toselect 	= GETPOST('toselect', 'array');
 $contextpage = GETPOST('contextpage', 'aZ') ?GETPOST('contextpage', 'aZ') : 'proposallist';
-$mode = GETPOST('mode', 'alpha');
+$mode 		= GETPOST('mode', 'alpha');
 
-$search_user = GETPOST('search_user', 'int');
-$search_sale = GETPOST('search_sale', 'int');
-$search_ref = GETPOST('sf_ref') ?GETPOST('sf_ref', 'alpha') : GETPOST('search_ref', 'alpha');
+// Search Fields
+$search_user 	= GETPOST('search_user', 'int');
+$search_sale 	= GETPOST('search_sale', 'int');
+$search_ref 	= GETPOST('sf_ref') ?GETPOST('sf_ref', 'alpha') : GETPOST('search_ref', 'alpha');
 $search_refcustomer = GETPOST('search_refcustomer', 'alpha');
-
 $search_refproject = GETPOST('search_refproject', 'alpha');
 $search_project = GETPOST('search_project', 'alpha');
 
@@ -107,8 +109,7 @@ $search_date_endyear = GETPOST('search_date_endyear', 'int');
 $search_date_start = dol_mktime(0, 0, 0, $search_date_startmonth, $search_date_startday, $search_date_startyear);	// Use tzserver
 $search_date_end = dol_mktime(23, 59, 59, $search_date_endmonth, $search_date_endday, $search_date_endyear);
 $search_date_end_startday = GETPOST('search_date_end_startday', 'int');
-$search_date_end_startmonth = GETPOST('se$sql .= $db->plimit($limit + 1, $offset);
-arch_date_end_startmonth', 'int');
+$search_date_end_startmonth = GETPOST('search_date_end_startmonth', 'int');
 $search_date_end_startyear = GETPOST('search_date_end_startyear', 'int');
 $search_date_end_endday = GETPOST('search_date_end_endday', 'int');
 $search_date_end_endmonth = GETPOST('search_date_end_endmonth', 'int');
@@ -140,15 +141,15 @@ $search_date_signature_endyear = GETPOST('search_date_signature_endyear', 'int')
 $search_date_signature_start = dol_mktime(0, 0, 0, $search_date_signature_startmonth, $search_date_signature_startday, $search_date_signature_startyear);
 $search_date_signature_end = dol_mktime(23, 59, 59, $search_date_signature_endmonth, $search_date_signature_endday, $search_date_signature_endyear);
 
-
 $search_status = GETPOST('search_status', 'alpha');
+
 $optioncss = GETPOST('optioncss', 'alpha');
 $object_statut = GETPOST('search_statut', 'alpha');
 
 $sall = trim((GETPOST('search_all', 'alphanohtml') != '') ?GETPOST('search_all', 'alphanohtml') : GETPOST('sall', 'alphanohtml'));
 $mesg = (GETPOST("msg") ? GETPOST("msg") : GETPOST("mesg"));
 
-
+// Pagination
 $limit = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
@@ -195,7 +196,7 @@ $search_array_options = $extrafields->getOptionalsFromPost($object->table_elemen
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array(
 	'p.ref'=>'Ref',
-	'p.ref_client'=>'CustomerRef',
+	'p.ref_client'=>'RefCustomer',
 	'pd.description'=>'Description',
 	's.nom'=>"ThirdParty",
 	's.name_alias'=>"AliasNameShort",
@@ -244,10 +245,10 @@ $arrayfields = array(
 	'p.multicurrency_total_invoiced'=>array('label'=>'MulticurrencyAmountInvoicedTTC', 'checked'=>0, 'enabled'=>isModEnabled("multicurrency") && !empty($conf->global->PROPOSAL_SHOW_INVOICED_AMOUNT)),
 	'u.login'=>array('label'=>"Author", 'checked'=>1, 'position'=>10),
 	'sale_representative'=>array('label'=>"SaleRepresentativesOfThirdParty", 'checked'=>-1),
-	'total_pa' => array('label' => (getDolGlobalString('MARGIN_TYPE') == '1' ? 'BuyingPrice' : 'CostPrice'), 'checked' => 0, 'position' => 300, 'enabled' => (!isModEnabled('margin') || !$user->rights->margins->liretous ? 0 : 1)),
-	'total_margin' => array('label' => 'Margin', 'checked' => 0, 'position' => 301, 'enabled' => (!isModEnabled('margin') || !$user->rights->margins->liretous ? 0 : 1)),
-	'total_margin_rate' => array('label' => 'MarginRate', 'checked' => 0, 'position' => 302, 'enabled' => (!isModEnabled('margin') || !$user->rights->margins->liretous || empty($conf->global->DISPLAY_MARGIN_RATES) ? 0 : 1)),
-	'total_mark_rate' => array('label' => 'MarkRate', 'checked' => 0, 'position' => 303, 'enabled' => (!isModEnabled('margin') || !$user->rights->margins->liretous || empty($conf->global->DISPLAY_MARK_RATES) ? 0 : 1)),
+	'total_pa' => array('label' => (getDolGlobalString('MARGIN_TYPE') == '1' ? 'BuyingPrice' : 'CostPrice'), 'checked' => 0, 'position' => 300, 'enabled' => (!isModEnabled('margin') || !$user->hasRight('margins', 'liretous') ? 0 : 1)),
+	'total_margin' => array('label' => 'Margin', 'checked' => 0, 'position' => 301, 'enabled' => (!isModEnabled('margin') || !$user->hasRight('margins', 'liretous') ? 0 : 1)),
+	'total_margin_rate' => array('label' => 'MarginRate', 'checked' => 0, 'position' => 302, 'enabled' => (!isModEnabled('margin') || !$user->hasRight('margins', 'liretous') || empty($conf->global->DISPLAY_MARGIN_RATES) ? 0 : 1)),
+	'total_mark_rate' => array('label' => 'MarkRate', 'checked' => 0, 'position' => 303, 'enabled' => (!isModEnabled('margin') || !$user->hasRight('margins', 'liretous') || empty($conf->global->DISPLAY_MARK_RATES) ? 0 : 1)),
 	'p.datec'=>array('label'=>"DateCreation", 'checked'=>0, 'position'=>500),
 	'p.tms'=>array('label'=>"DateModificationShort", 'checked'=>0, 'position'=>500),
 	'p.date_cloture'=>array('label'=>"DateClosing", 'checked'=>0, 'position'=>500),
@@ -263,6 +264,7 @@ foreach ($object->fields as $key => $val) {
 		$fieldstosearchall['t.'.$key] = $val['label'];
 	}
 }*/
+
 // Definition of array of fields for columns
 /*$arrayfields = array();
 foreach ($object->fields as $key => $val) {
@@ -278,20 +280,22 @@ foreach ($object->fields as $key => $val) {
 		);
 	}
 }*/
+
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 
-$permissiontoread = $user->rights->propal->lire;
-$permissiontoadd = $user->rights->propal->creer;
-$permissiontodelete = $user->rights->propal->supprimer;
+// Permissions
+$permissiontoread = $user->hasRight('propal', 'lire');
+$permissiontoadd = $user->hasRight('propal', 'creer');
+$permissiontodelete = $user->hasRight('propal', 'supprimer');
 if (!empty($conf->global->MAIN_USE_ADVANCED_PERMS)) {
-	$permissiontovalidate = $user->rights->propal->propal_advance->validate;
-	$permissiontoclose = $user->rights->propal->propal_advance->close;
-	$permissiontosendbymail = $user->rights->propal->propal_advance->send;
+	$permissiontovalidate = $user->hasRight('propal', 'propal_advance', 'validate');
+	$permissiontoclose = $user->hasRight('propal', 'propal_advance', 'close');
+	$permissiontosendbymail = $user->hasRight('propal', 'propal_advance', 'send');
 } else {
-	$permissiontovalidate = $user->rights->propal->creer;
-	$permissiontoclose = $user->rights->propal->creer;
-	$permissiontosendbymail = $user->rights->propal->lire;
+	$permissiontovalidate = $user->hasRight('propal', 'creer');
+	$permissiontoclose = $user->hasRight('propal', 'creer');
+	$permissiontosendbymail = $user->hasRight('propal', 'lire');
 }
 
 
@@ -553,10 +557,6 @@ $formcompany = new FormCompany($db);
 $varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 
-$title = $langs->trans('ListOfProposals');
-$help_url = 'EN:Commercial_Proposals|FR:Proposition_commerciale|ES:Presupuestos';
-llxHeader('', $title, $help_url);
-
 $sql = 'SELECT';
 if ($sall || $search_user > 0) {
 	$sql = 'SELECT DISTINCT';
@@ -809,7 +809,7 @@ $sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPri
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
 	/* The fast and low memory method to get and count full list converts the sql into a sql count */
 	$sqlforcount = preg_replace('/^'.preg_quote($sqlfields, '/').'/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
 	$sqlforcount = preg_replace('/GROUP BY .*$/', '', $sqlforcount);
@@ -864,6 +864,9 @@ if ($resql) {
 		exit;
 	}
 
+	$help_url = 'EN:Commercial_Proposals|FR:Proposition_commerciale|ES:Presupuestos';
+	llxHeader('', $title, $help_url);
+
 	$param = '&search_status='.urlencode($search_status);
 	if (!empty($mode)) {
 		$param .= '&mode='.urlencode($mode);
@@ -872,7 +875,7 @@ if ($resql) {
 		$param .= '&contextpage='.urlencode($contextpage);
 	}
 	if ($limit > 0 && $limit != $conf->liste_limit) {
-		$param .= '&limit='.urlencode($limit);
+		$param .= '&limit='.((int) $limit);
 	}
 	if ($sall) {
 		$param .= '&sall='.urlencode($sall);
@@ -1079,7 +1082,7 @@ if ($resql) {
 	$newcardbutton = '';
 	$newcardbutton .= dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER["PHP_SELF"].'?mode=common'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', ((empty($mode) || $mode == 'common') ? 2 : 1), array('morecss'=>'reposition'));
 	$newcardbutton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-list imgforviewmode', $_SERVER["PHP_SELF"].'?mode=kanban'.preg_replace('/(&|\?)*mode=[^&]+/', '', $param), '', ($mode == 'kanban' ? 2 : 1), array('morecss'=>'reposition'));
-	$newcardbutton = dolGetButtonTitle($langs->trans('NewPropal'), '', 'fa fa-plus-circle', $url, '', $user->rights->propal->creer);
+	$newcardbutton = dolGetButtonTitle($langs->trans('NewPropal'), '', 'fa fa-plus-circle', $url, '', $user->hasRight('propal', 'creer'));
 
 	// Fields title search
 	print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">';
@@ -1148,7 +1151,7 @@ if ($resql) {
 		$formcategory = new FormCategory($db);
 		$moreforfilter .= $formcategory->getFilterBox(Categorie::TYPE_PRODUCT, array($search_product_category), 'maxwidth300', $searchCategoryProductOperator, 0, 0, $tmptitle);
 	}
-	if (isModEnabled('categorie') && $user->rights->categorie->lire) {
+	if (isModEnabled('categorie') && $user->hasRight('categorie', 'lire')) {
 		require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 		$moreforfilter .= '<div class="divsearchfield">';
 		$tmptitle = $langs->trans('CustomersProspectsCategoriesShort');
@@ -1713,14 +1716,14 @@ if ($resql) {
 		if ($mode == 'kanban') {
 			if ($i == 0) {
 				print '<tr><td colspan="12">';
-				print '<div class="box-flex-container">';
+				print '<div class="box-flex-container kanban">';
 			}
 			// Output Kanban
 			$userstatic->fetch($obj->fk_user_author);
 			$objectstatic->author = $userstatic->getNomUrl(1);
 			$objectstatic->fk_project = $projectstatic->getNomUrl(1);
-			print $objectstatic->getKanbanView('');
-			if ($i == (min($num, $limit) - 1)) {
+			print $objectstatic->getKanbanView('', array('selected' => in_array($object->id, $arrayofselected)));
+			if ($i == ($imaxinloop - 1)) {
 				print '</div>';
 				print '</td></tr>';
 			}
@@ -2332,8 +2335,8 @@ if ($resql) {
 	$urlsource .= str_replace('&amp;', '&', $param);
 
 	$filedir = $diroutputmassaction;
-	$genallowed = $user->rights->propal->lire;
-	$delallowed = $user->rights->propal->creer;
+	$genallowed = $user->hasRight('propal', 'lire');
+	$delallowed = $user->hasRight('propal', 'creer');
 
 	print $formfile->showdocuments('massfilesarea_proposals', '', $filedir, $urlsource, 0, $delallowed, '', 1, 1, 0, 48, 1, $param, $title, '', '', '', null, $hidegeneratedfilelistifempty);
 } else {

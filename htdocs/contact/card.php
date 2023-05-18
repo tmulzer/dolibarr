@@ -96,7 +96,7 @@ if (!($object->id > 0) && $action == 'view') {
 }
 
 $triggermodname = 'CONTACT_MODIFY';
-$permissiontoadd = $user->rights->societe->contact->creer;
+$permissiontoadd = $user->hasRight('societe', 'contact', 'creer');
 
 // Security check
 if ($user->socid) {
@@ -213,11 +213,6 @@ if (empty($reshook)) {
 		$object->town = (string) GETPOST("town", 'alpha');
 		$object->country_id = (int) GETPOST("country_id", 'int');
 		$object->state_id = (int) GETPOST("state_id", 'int');
-		//$object->jabberid		= GETPOST("jabberid", 'alpha');
-		//$object->skype		= GETPOST("skype", 'alpha');
-		//$object->twitter		= GETPOST("twitter", 'alpha');
-		//$object->facebook		= GETPOST("facebook", 'alpha');
-		//$object->linkedin		= GETPOST("linkedin", 'alpha');
 		$object->socialnetworks = array();
 		if (isModEnabled('socialnetworks')) {
 			foreach ($socialnetworks as $key => $value) {
@@ -419,11 +414,6 @@ if (empty($reshook)) {
 
 			$object->email = (string) GETPOST('email', 'custom', 0, FILTER_SANITIZE_EMAIL);
 			$object->no_email = GETPOST("no_email", "int");
-			//$object->jabberid		= GETPOST("jabberid", 'alpha');
-			//$object->skype		= GETPOST("skype", 'alpha');
-			//$object->twitter		= GETPOST("twitter", 'alpha');
-			//$object->facebook		= GETPOST("facebook", 'alpha');
-			//$object->linkedin		= GETPOST("linkedin", 'alpha');
 			$object->socialnetworks = array();
 			if (isModEnabled('socialnetworks')) {
 				foreach ($socialnetworks as $key => $value) {
@@ -690,6 +680,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 			print '<td colspan="3"><input name="lastname" id="lastname" type="text" class="maxwidth100onsmartphone" maxlength="80" value="'.dol_escape_htmltag(GETPOST("lastname", 'alpha') ?GETPOST("lastname", 'alpha') : $object->lastname).'" autofocus="autofocus"></td>';
 			print '</tr>';
 
+			// Firstname
 			print '<tr>';
 			print '<td><label for="firstname">';
 			print $form->textwithpicto($langs->trans("Firstname"), $langs->trans("KeepEmptyIfGenericAddress")).'</label></td>';
@@ -707,7 +698,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 					print '</td></tr>';
 				} else {
 					print '<tr><td><label for="socid">'.$langs->trans("ThirdParty").'</label></td><td colspan="3" class="maxwidthonsmartphone">';
-					print img_picto('', 'company').$form->select_company($socid, 'socid', '', 'SelectThirdParty', 0, 0, null, 0, 'minwidth300 maxwidth500 widthcentpercentminusxx');
+					print img_picto('', 'company', 'class="pictofixedwidth"').$form->select_company($socid, 'socid', '', 'SelectThirdParty', 0, 0, null, 0, 'minwidth300 maxwidth500 widthcentpercentminusxx');
 					print '</td></tr>';
 				}
 			}
@@ -759,7 +750,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 
 			// Country
 			print '<tr><td><label for="selectcountry_id">'.$langs->trans("Country").'</label></td><td colspan="'.$colspan.'" class="maxwidthonsmartphone">';
-			print img_picto('', 'globe-americas', 'class="paddingrightonly"');
+			print img_picto('', 'globe-americas', 'class="pictofixedwidth"');
 			print $form->select_country((GETPOST("country_id", 'alpha') ? GETPOST("country_id", 'alpha') : $object->country_id), 'country_id');
 			if ($user->admin) {
 				print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
@@ -793,26 +784,26 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 			// Phone / Fax
 			print '<tr><td>'.$form->editfieldkey('PhonePro', 'phone_pro', '', $object, 0).'</td>';
 			print '<td>';
-			print img_picto('', 'object_phoning');
+			print img_picto('', 'object_phoning', 'class="pictofixedwidth"');
 			print '<input type="text" name="phone_pro" id="phone_pro" class="maxwidth200" value="'.(GETPOSTISSET('phone_pro') ? GETPOST('phone_pro', 'alpha') : $object->phone_pro).'"></td>';
 			if ($conf->browser->layout == 'phone') {
 				print '</tr><tr>';
 			}
 			print '<td>'.$form->editfieldkey('PhonePerso', 'phone_perso', '', $object, 0).'</td>';
 			print '<td>';
-			print img_picto('', 'object_phoning');
+			print img_picto('', 'object_phoning', 'class="pictofixedwidth"');
 			print '<input type="text" name="phone_perso" id="phone_perso" class="maxwidth200" value="'.(GETPOSTISSET('phone_perso') ? GETPOST('phone_perso', 'alpha') : $object->phone_perso).'"></td></tr>';
 
 			print '<tr><td>'.$form->editfieldkey('PhoneMobile', 'phone_mobile', '', $object, 0).'</td>';
 			print '<td>';
-			print img_picto('', 'object_phoning_mobile');
+			print img_picto('', 'object_phoning_mobile', 'class="pictofixedwidth"');
 			print '<input type="text" name="phone_mobile" id="phone_mobile" class="maxwidth200" value="'.(GETPOSTISSET('phone_mobile') ? GETPOST('phone_mobile', 'alpha') : $object->phone_mobile).'"></td>';
 			if ($conf->browser->layout == 'phone') {
 				print '</tr><tr>';
 			}
 			print '<td>'.$form->editfieldkey('Fax', 'fax', '', $object, 0).'</td>';
 			print '<td>';
-			print img_picto('', 'object_phoning_fax');
+			print img_picto('', 'object_phoning_fax', 'class="pictofixedwidth"');
 			print '<input type="text" name="fax" id="fax" class="maxwidth200" value="'.(GETPOSTISSET('fax') ? GETPOST('fax', 'alpha') : $object->fax).'"></td>';
 			print '</tr>';
 
@@ -823,7 +814,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 			// Email
 			print '<tr><td>'.$form->editfieldkey('EMail', 'email', '', $object, 0, 'string', '').'</td>';
 			print '<td>';
-			print img_picto('', 'object_email');
+			print img_picto('', 'object_email', 'class="pictofixedwidth"');
 			print '<input type="text" name="email" id="email" value="'.(GETPOSTISSET('email') ? GETPOST('email', 'alpha') : $object->email).'"></td>';
 			print '</tr>';
 
@@ -856,9 +847,9 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 				print '</tr>';
 			}
 
-
+			// Social network
 			if (isModEnabled('socialnetworks')) {
-				showSocialNetwork();
+				$object->showSocialNetwork($socialnetworks, ($conf->browser->layout == 'phone' ? 2 : 4));
 			}
 
 			// Visibility
@@ -879,7 +870,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 			if (isModEnabled('categorie') && !empty($user->rights->categorie->lire)) {
 				print '<tr><td>'.$form->editfieldkey('Categories', 'contcats', '', $object, 0).'</td><td colspan="3">';
 				$cate_arbo = $form->select_all_categories(Categorie::TYPE_CONTACT, null, 'parent', null, null, 1);
-				print img_picto('', 'category').$form->multiselectarray('contcats', $cate_arbo, GETPOST('contcats', 'array'), null, null, null, null, '90%');
+				print img_picto('', 'category', 'class="pictofixedwidth"').$form->multiselectarray('contcats', $cate_arbo, GETPOST('contcats', 'array'), null, null, null, null, '90%');
 				print "</td></tr>";
 			}
 
@@ -1005,7 +996,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 			if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
 				print '<tr><td><label for="socid">'.$langs->trans("ThirdParty").'</label></td>';
 				print '<td colspan="3" class="maxwidthonsmartphone">';
-				print img_picto('', 'company').$form->select_company(GETPOST('socid', 'int') ?GETPOST('socid', 'int') : ($object->socid ? $object->socid : -1), 'socid', '', $langs->trans("SelectThirdParty"));
+				print img_picto('', 'company').$form->select_company(GETPOST('socid', 'int') ? GETPOST('socid', 'int') : ($object->socid ? $object->socid : -1), 'socid', '', $langs->trans("SelectThirdParty"));
 				print '</td>';
 				print '</tr>';
 			}
@@ -1128,8 +1119,9 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 				print '</tr>';
 			}
 
+			// Social network
 			if (isModEnabled('socialnetworks')) {
-				showSocialNetwork();
+				$object->showSocialNetwork($socialnetworks, ($conf->browser->layout == 'phone' ? 2 : 4));
 			}
 
 			// Visibility
@@ -1175,7 +1167,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 				foreach ($cats as $cat) {
 					$arrayselected[] = $cat->id;
 				}
-				print img_picto('', 'category').$form->multiselectarray('contcats', $cate_arbo, $arrayselected, '', 0, '', 0, '90%');
+				print img_picto('', 'category', 'class="pictofixedwidth"').$form->multiselectarray('contcats', $cate_arbo, $arrayselected, '', 0, '', 0, '90%');
 				print "</td></tr>";
 			}
 
@@ -1317,7 +1309,6 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 		if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
 			$objsoc->fetch($object->socid);
 			// Thirdparty
-			$morehtmlref .= $langs->trans('ThirdParty').' : ';
 			if ($objsoc->id > 0) {
 				$morehtmlref .= $objsoc->getNomUrl(1, 'contact');
 			} else {
@@ -1509,7 +1500,7 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 		print "</table>";
 
 		print '</div></div>';
-		print '<div style="clear:both"></div>';
+		print '<div class="clearboth"></div>';
 
 		print dol_get_fiche_end();
 
@@ -1582,55 +1573,6 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action)) {
 
 		include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 	}
-}
-
-/**
- * Show social network part if the module is enabled with hiding functionality
- *
- * @return void
- */
-function showSocialNetwork()
-{
-	global $socialnetworks, $object, $form, $object, $langs;
-	echo '<script type="text/javascript">$("document").ready(function() {toogleSocialNetwork(false); });</script>';
-
-	print '<tr><td>&nbsp;</td><td><a id="lnk" href="javascript:toogleSocialNetwork(true)"></a></td></tr>';
-	foreach ($socialnetworks as $key => $value) {
-		if ($value['active']) {
-			print '<tr class="soc_network">';
-			print '<td><label for="'.$value['label'].'">'.$form->editfieldkey($value['label'], $key, '', $object, 0).'</label></td>';
-			print '<td colspan="3">';
-			if (!empty($value['icon'])) {
-				print '<span class="fa '.$value['icon'].'"></span>';
-			}
-			print '<input type="text" name="'.$key.'" id="'.$key.'" class="minwidth100" maxlength="80" value="'.dol_escape_htmltag(GETPOSTISSET($key) ?GETPOST($key, 'alphanohtml') : (!empty($object->socialnetworks[$key]) ? $object->socialnetworks[$key] : "")).'">';
-			print '</td>';
-			print '</tr>';
-		} elseif (!empty($object->socialnetworks[$key])) {
-			print '<input type="hidden" name="'.$key.'" value="'.$object->socialnetworks[$key].'">';
-		}
-	}
-
-	print '<script type="text/javascript">
-
-	function toogleSocialNetwork(chgCookieState) {
-		const lnk = $("#lnk");
-		const items = $(".soc_network");
-		var cookieState = document.cookie.split(";").some((item) => item.trim().startsWith("DOLUSER_SOCIALNETWORKS_SHOW=true")) == true;
-
-		if (!chgCookieState) cookieState = !cookieState ;
-
-		if (cookieState) {
-			items.hide();
-			lnk.text("'.dol_escape_js($langs->transnoentitiesnoconv("ShowSocialNetwork")).'...");
-			if(chgCookieState) {document.cookie = "DOLUSER_SOCIALNETWORKS_SHOW=false; SameSite=Strict"};
-		} else {
-			items.show();
-			lnk.text("'.dol_escape_js($langs->transnoentitiesnoconv("HideSocialNetwork")).'");
-			if(chgCookieState) {document.cookie = "DOLUSER_SOCIALNETWORKS_SHOW=true; SameSite=Strict";}
-		}
-	}
-	</script>';
 }
 
 

@@ -42,6 +42,7 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
 $page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
+$massaction = GETPOST('massaction', 'alpha');
 if (empty($page) || $page == -1 || GETPOST('button_search', 'alpha') || GETPOST('button_removefilter', 'alpha') || (empty($toselect) && $massaction === '0')) {
 	$page = 0;
 }     // If $page is not defined, or '' or -1 or if we click on clear filters or if we select empty mass action
@@ -129,7 +130,7 @@ $sql .= " GROUP BY l.rowid, l.label, l.capital, l.paid, l.datestart, l.dateend";
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
 	/* The fast and low memory method to get and count full list converts the sql into a sql count */
 	$sqlforcount = preg_replace('/^'.preg_quote($sqlfields, '/').'/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
 	$sqlforcount = preg_replace('/'.preg_quote($linktopl, '/').'/', '', $sqlforcount);
@@ -148,6 +149,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
 	}
 	$db->free($resql);
 }
+$arrayfields = array();
 
 // Complete request and execute it with limit
 $sql .= $db->order($sortfield, $sortorder);
@@ -179,7 +181,7 @@ if ($resql) {
 		$param .= '&contextpage='.urlencode($contextpage);
 	}
 	if ($limit > 0 && $limit != $conf->liste_limit) {
-		$param .= '&limit='.urlencode($limit);
+		$param .= '&limit='.((int) $limit);
 	}
 	if ($search_ref) {
 		$param .= "&search_ref=".urlencode($search_ref);
@@ -225,27 +227,41 @@ if ($resql) {
 
 	// Filters lines
 	print '<tr class="liste_titre_filter">';
+	if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+		print '<td class="liste_titre maxwidthsearch">';
+		$searchpicto = $form->showFilterAndCheckAddButtons();
+		print $searchpicto;
+		print '</td>';
+	}
 	print '<td class="liste_titre"><input class="flat" size="4" type="text" name="search_ref" value="'.$search_ref.'"></td>';
 	print '<td class="liste_titre"><input class="flat" size="12" type="text" name="search_label" value="'.$search_label.'"></td>';
 	print '<td class="liste_titre right" ><input class="flat" size="8" type="text" name="search_amount" value="'.$search_amount.'"></td>';
 	print '<td class="liste_titre">&nbsp;</td>';
 	print '<td class="liste_titre">&nbsp;</td>';
 	print '<td class="liste_titre"></td>';
-	print '<td class="liste_titre maxwidthsearch">';
-	$searchpicto = $form->showFilterAndCheckAddButtons(0);
-	print $searchpicto;
-	print '</td>';
+	if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+		print '<td class="liste_titre maxwidthsearch">';
+		$searchpicto = $form->showFilterAndCheckAddButtons();
+		print $searchpicto;
+		print '</td>';
+	}
+	print '</tr>';
 
 	// Fields title label
 	// --------------------------------------------------------------------
 	print '<tr class="liste_titre">';
+	if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+		print_liste_field_titre('', $_SERVER["PHP_SELF"], "", '', '', '', $sortfield, $sortorder, 'maxwidthsearch ');
+	}
 	print_liste_field_titre("Ref", $_SERVER["PHP_SELF"], "l.rowid", "", $param, "", $sortfield, $sortorder);
 	print_liste_field_titre("Label", $_SERVER["PHP_SELF"], "l.label", "", $param, '', $sortfield, $sortorder, 'left ');
 	print_liste_field_titre("LoanCapital", $_SERVER["PHP_SELF"], "l.capital", "", $param, '', $sortfield, $sortorder, 'right ');
 	print_liste_field_titre("DateStart", $_SERVER["PHP_SELF"], "l.datestart", "", $param, '', $sortfield, $sortorder, 'center ');
 	print_liste_field_titre("DateEnd", $_SERVER["PHP_SELF"], "l.dateend", "", $param, '', $sortfield, $sortorder, 'center ');
 	print_liste_field_titre("Status", $_SERVER["PHP_SELF"], "l.paid", "", $param, '', $sortfield, $sortorder, 'right ');
-	print_liste_field_titre('', $_SERVER["PHP_SELF"], "", '', '', '', $sortfield, $sortorder, 'maxwidthsearch ');
+	if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+		print_liste_field_titre('', $_SERVER["PHP_SELF"], "", '', '', '', $sortfield, $sortorder, 'maxwidthsearch ');
+	}
 	print "</tr>\n";
 
 	print "</tr>\n";
@@ -254,7 +270,8 @@ if ($resql) {
 	// --------------------------------------------------------------------
 	$i = 0;
 	$totalarray = array();
-	while ($i < ($limit ? min($num, $limit) : $num)) {
+	$imaxinloop = ($limit ? min($num, $limit) : $num);
+	while ($i < $imaxinloop) {
 		$obj = $db->fetch_object($resql);
 		if (empty($obj)) {
 			break; // Should not happen
@@ -269,7 +286,7 @@ if ($resql) {
 		if ($mode == 'kanban') {
 			if ($i == 0) {
 				print '<tr><td colspan="12">';
-				print '<div class="box-flex-container">';
+				print '<div class="box-flex-container kanban">';
 			}
 			// Output Kanban
 			$loan_static->datestart= $obj->datestart;
@@ -277,13 +294,18 @@ if ($resql) {
 			$loan_static->capital = $obj->capital;
 			$loan_static->totalpaid = $obj->paid;
 
-			print $loan_static->getKanbanView('');
-			if ($i == (min($num, $limit) - 1)) {
+			print $loan_static->getKanbanView('', array('selected' => in_array($loan_static->id, $arrayofselected)));
+			if ($i == ($imaxinloop - 1)) {
 				print '</div>';
 				print '</td></tr>';
 			}
 		} else {
 			print '<tr class="oddeven">';
+
+			// Action column
+			if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+				print '<td></td>';
+			}
 
 			// Ref
 			print '<td>'.$loan_static->getNomUrl(1).'</td>';
@@ -304,7 +326,10 @@ if ($resql) {
 			print $loan_static->LibStatut($obj->paid, 5, $obj->alreadypaid);
 			print '</td>';
 
-			print '<td></td>';
+			// Action column
+			if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+				print '<td></td>';
+			}
 
 			print "</tr>\n";
 		}

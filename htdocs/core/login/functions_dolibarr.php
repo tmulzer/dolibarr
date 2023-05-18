@@ -65,33 +65,16 @@ function check_user_password_dolibarr($usertotest, $passwordtotest, $entitytotes
 		}
 		$sql .= ") AND ".$entitycol." IN (0,".($entity ? ((int) $entity) : 1).")";
 		$sql .= " AND statut = 1";
-		// Note: Test on validity is done later
 		// Order is required to firstly found the user into entity, then the superadmin.
 		// For the case (TODO: we must avoid that) a user has renamed its login with same value than a user in entity 0.
 		$sql .= " ORDER BY entity DESC";
+
+		// Note: Test on validity is done later natively with isNotIntoValidityDateRange() by core after calling checkLoginPassEntity() that call this method
 
 		$resql = $db->query($sql);
 		if ($resql) {
 			$obj = $db->fetch_object($resql);
 			if ($obj) {
-				$now = dol_now();
-				// Check date start validity
-				if ($obj->datestartvalidity && $db->jdate($obj->datestartvalidity) > $now) {
-					// Load translation files required by the page
-					$langs->loadLangs(array('main', 'errors'));
-					$_SESSION["dol_loginmesg"] = $langs->transnoentitiesnoconv("ErrorLoginDateValidity");
-					dol_syslog("functions_dolibarr::check_user_password_dolibarr bad datestart validity", LOG_WARNING);
-					return '--bad-login-validity--';
-				}
-				// Check date end validity
-				if ($obj->dateendvalidity && $db->jdate($obj->dateendvalidity) < dol_get_first_hour($now)) {
-					// Load translation files required by the page
-					$langs->loadLangs(array('main', 'errors'));
-					$_SESSION["dol_loginmesg"] = $langs->transnoentitiesnoconv("ErrorLoginDateValidity");
-					dol_syslog("functions_dolibarr::check_user_password_dolibarr bad date end validity", LOG_WARNING);
-					return '--bad-login-validity--';
-				}
-
 				$passclear = $obj->pass;
 				$passcrypted = $obj->pass_crypted;
 				$passtyped = $passwordtotest;
@@ -121,7 +104,7 @@ function check_user_password_dolibarr($usertotest, $passwordtotest, $entitytotes
 					if ((!$passcrypted || $passtyped)
 						&& ($passclear && ($passtyped == $passclear))) {
 						$passok = true;
-						dol_syslog("functions_dolibarr::check_user_password_dolibarr Authentification ok - found pass in database");
+						dol_syslog("functions_dolibarr::check_user_password_dolibarr Authentification ok - found old pass in database", LOG_WARNING);
 					}
 				}
 
